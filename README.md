@@ -1,2 +1,2 @@
-# fogid-xai
-Explainable AI for Fog-based Impersonation Detection
+# FogCID-XAI
+Explainable AI approach for Fog Computing based Impersonation Detection
