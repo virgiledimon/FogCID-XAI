@@ -1,0 +1,1 @@
+from gym_fc_impersonation_detection.envs.fc_spoofing_detection_env import FCSpoofingEnv
