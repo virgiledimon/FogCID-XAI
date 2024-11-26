@@ -1,0 +1,12 @@
+streamlit
+psycopg2
+scipy
+#logging
+psycopg2
+numpy
+gymnasium
+matplotlib
+scikit-learn
+shap
+panda
+lime
