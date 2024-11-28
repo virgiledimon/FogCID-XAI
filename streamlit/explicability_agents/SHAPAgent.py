@@ -47,12 +47,8 @@ class SHAPAgent:
         # Afficher le summary plot et le bar plot
         accept_shap_values = shap_values[..., 1]
         
-        return {
-           shap.summary_plot(accept_shap_values, self.X_test),
-           shap.summary_plot(accept_shap_values, self.X_test, plot_type="bar"),
-           shap.dependence_plot("lambda_threshold", accept_shap_values, self.X_test),
-           shap.dependence_plot("L_value", accept_shap_values, self.X_test)
-        }
+        return accept_shap_values, feature_names
+        
         
 
     # Méthode pour afficher les valeurs SHAP dans un tableau

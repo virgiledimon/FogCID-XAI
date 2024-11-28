@@ -37,6 +37,7 @@ class PostgreSQLAgent:
             query = """
             SELECT lambda_threshold, L_value, decision_made, v_channel_vector, r_channel_record, reward, is_legit
             FROM training_steps_data
+            ORDER BY timestamp DESC
             LIMIT %s
             """
             self.cursor.execute(query, [nbr_records])
@@ -52,6 +53,7 @@ class PostgreSQLAgent:
             query = """
             SELECT episode, step, state, lambda_threshold, L_value, is_legit, decision_made, v_channel_vector, r_channel_record, reward, far, mdr, aer, q_value_a, q_value_b, politique_pi
             FROM training_steps_data
+            ORDER BY timestamp DESC
             LIMIT %s
             """
             self.cursor.execute(query, [nbr_records])
@@ -68,6 +70,7 @@ class PostgreSQLAgent:
             query = """
             SELECT lambda_threshold, L_value, decision_made, v_channel_vector, r_channel_record
             FROM training_steps_data
+            ORDER BY timestamp DESC
             LIMIT 200
             """
             self.cursor.execute(query)
