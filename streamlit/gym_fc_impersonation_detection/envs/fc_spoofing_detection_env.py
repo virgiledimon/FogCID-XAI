@@ -160,6 +160,7 @@ class FCSpoofingEnv(gym.Env):
         plt.ylim(0, self.area_size)
         plt.title("Visualisation des positions avec les noms des transmetteurs et récepteurs")
         plt.show()
+        plt.clf()
     ################################################################################################
 
     ################################################################################################

@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import time
-from detection_agents.DoubleSarsaAgent import DoubleSarsaAgent  # à ajuster selon l'emplacement des agents
+from detection_agents.DoubleSarsaAgent import DoubleSarsaAgent
 from explicability_agents.SHAPAgent import SHAPAgent
 from explicability_agents.LIMEAgent import LIMEAgent
 from explicability_agents.PFIAgent import PFIAgent
@@ -9,7 +9,6 @@ from data.PostgreSQLAgent import PostgreSQLAgent
 from interpretability_agents.InterpretabilityAgent import InterpretabilityAgent
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-from sklearn.tree import plot_tree
 import streamlit.components.v1 as components
 import shap
 from streamlit_shap import st_shap
@@ -17,11 +16,22 @@ import dtreeviz
 import graphviz as graphviz
 from sklearn import tree
 import numpy as np
+import os
+from sshtunnel import SSHTunnelForwarder
 
 st.set_page_config(
     page_title="FogCID-XAI",
     layout = "centered"
 )
+
+# env variables
+bd_over_ssh = st.secrets['STREAMLIT_DB_OVER_SSH'] 
+
+# Secrets variables
+secret_db_name = st.secrets["db_name"]
+secret_db_user = st.secrets["db_user"]
+secret_db_password = st.secrets["db_password"]
+secret_db_port = st.secrets["db_port"]
 
 def display_global_shap_plots(shapley_values, dataframe_test, features):
     ssp_container1 = st.container()
@@ -45,7 +55,7 @@ def simulate(database_agent, episodes_number, ml_algorithm, records_number):
     detection_agent = DoubleSarsaAgent(db_agent=database_agent, N=episodes_number) if ml_algorithm == "Double SARSA" else None
 
     # Exécution de l'agent de détection et collecte des données
-    #detection_agent.run_simulation()  # Lancement de la simulation
+    detection_agent.run_simulation()  # Lancement de la simulation
 
     # Récupérer les données de décisions via l'agent PostgreSQL
     decision_data = database_agent.fetch_decisions_data(records_number)
@@ -153,6 +163,8 @@ def main():
 
     st.sidebar.markdown("# Simulation Configuration")
 
+    tunnel = None
+
     # Formulaire de choix de simulation
     with st.sidebar:
         with st.form("input_params_form", clear_on_submit=False):
@@ -164,8 +176,20 @@ def main():
             leg_transmitters_number = st.number_input("Number of legitimate transmitters", min_value=0, value=10)
             illeg_transmitter_number = st.number_input("Number of illegitimate transmitters", min_value=0, value=5)
             submitted = st.form_submit_button("Rerun simulation")
+    
+    if bd_over_ssh == "YES":
+        # Create an SSH tunnel
+        tunnel = SSHTunnelForwarder(
+            ('premium226.web-hosting.com', 21098),
+            ssh_username='virgvakl',
+            ssh_password='Ibelievein@2024',
+            remote_bind_address=('127.0.0.1', 5432),
+            local_bind_address=('127.0.0.1', 5555), # could be any available port
+        )
+        # Start the tunnel
+        tunnel.start()
 
-    db_agent = PostgreSQLAgent(db_name='virgvakl_fogcid_xai', user='virgvakl_fogcid_xai_user', password='naThisIsFogProject2024', port='5522')
+    db_agent = PostgreSQLAgent(db_name='virgvakl_fogcid_xai', user='virgvakl_fogcid_xai_user', password='naThisIsFogProject2024', port=5555)
 
     # By default when the page is loaded, we take defaults values and run the simulation
     simulate(db_agent, episode_nbr, algo, dataset_rows_nbr)
@@ -173,6 +197,11 @@ def main():
     # Lorsque le formulaire est soumis (Rerunning)
     if submitted:
         simulate(db_agent, episode_nbr, algo, dataset_rows_nbr)
+    
+    db_agent.close()
+    if tunnel is not None:
+        tunnel.stop(force=True)
+        tunnel.close()
 
 if __name__ == "__main__":
     main()
