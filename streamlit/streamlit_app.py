@@ -203,25 +203,25 @@ def main():
             receivers_number = st.number_input("Number of receivers devices", min_value=0, value=5)
             leg_transmitters_number = st.number_input("Number of legitimate transmitters", min_value=0, value=10)
             illeg_transmitter_number = st.number_input("Number of illegitimate transmitters", min_value=0, value=5)
-            local_instance_idx = st.number_input("Local explicability instance idx", min_value=0, value=0, max_value=int(dataset_rows_nbr*(test_size/100)))
+            local_instance_idx = st.number_input("Local explicability instance idx", min_value=0, value=1, max_value=int(dataset_rows_nbr*(test_size/100)))
             submitted = st.form_submit_button("Rerun simulation")
         
     ###############################################################
 
-    # By default when the page is loaded, we take defaults values and run the simulation
-    # simulate(
-    #     episode_nbr, 
-    #     algo, 
-    #     dataset_rows_nbr, 
-    #     test_size/100, 
-    #     local_instance_idx, 
-    #     receivers_number, 
-    #     leg_transmitters_number, 
-    #     illeg_transmitter_number
-    # )
-
     # Lorsque le formulaire est soumis (Rerunning)
     if submitted:
+        simulate(
+            episode_nbr, 
+            algo, 
+            dataset_rows_nbr, 
+            test_size/100, 
+            local_instance_idx, 
+            receivers_number, 
+            leg_transmitters_number, 
+            illeg_transmitter_number
+        )
+    else:
+        # By default when the page is loaded, we take defaults values and run the simulation
         simulate(
             episode_nbr, 
             algo, 
