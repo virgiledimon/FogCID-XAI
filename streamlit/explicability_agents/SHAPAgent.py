@@ -27,8 +27,7 @@ class SHAPAgent:
         print("\n")
         print(f"Base value: {explainer.expected_value[1]}")
         # Initialisation de JavaScript pour les graphiques interactifs
-        force_plot = shap.force_plot(explainer.expected_value[1], shap_values[..., 1], feature_names=self.X_test.columns, link="logit", matplotlib=False, show=True, figsize=(9,4))
-        return f"<head>{shap.getjs()}</head><body style='background-color:white;'>{force_plot.html()}</body>"
+        return explainer.expected_value[1], shap_values[..., 1], self.X_test.columns
     
     # Méthode pour expliquer le modèle entier avec SHAP
     def explain_model(self):
@@ -47,10 +46,9 @@ class SHAPAgent:
         # Afficher le summary plot et le bar plot
         accept_shap_values = shap_values[..., 1]
         
-        return accept_shap_values, feature_names
+        return accept_shap_values, feature_names, self.X_test
         
         
-
     # Méthode pour afficher les valeurs SHAP dans un tableau
     def display_shap_values_table(self, shap_values, X_test):
         # Sélectionner les valeurs SHAP pour la classe d'acceptation
@@ -59,21 +57,3 @@ class SHAPAgent:
         shap_df = pd.DataFrame(accept_shap_values, columns=X_test.columns)
         print("\nTableau des valeurs SHAP pour les décisions 'Accept':")
         print(shap_df.head())  # Afficher les premières lignes du tableau
-
-
-# Exemple d'utilisation
-# if __name__ == "__main__":
-#     # Supposons que db_agent est déjà initialisé et connecté à la base de données
-#     db_agent = PostgreSQLAgent(db_name='', user='postgres', password='postgres')
-
-#     # Créer l'agent SHAP en utilisant le modèle déjà entraîné
-#     shap_agent = SHAPAgent(model=interpret_agent.model_decision, db_agent=db_agent)
-
-#     # Récupérer et normaliser les données de décisions depuis la base
-#     shap_agent.get_normalized_decision_data()
-
-#     # Expliquer le modèle entier
-#     shap_agent.explain_model()
-
-#     # Instance
-#     shap_agent.explain_instance()

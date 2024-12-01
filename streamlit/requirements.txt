@@ -11,3 +11,5 @@ shap
 panda
 lime
 streamlit-shap
+dtreeviz
+graphviz
