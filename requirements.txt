@@ -1,8 +1,7 @@
 streamlit
-psycopg2
+psycopg2-binary
 scipy
 #logging
-psycopg2
 numpy
 gymnasium
 matplotlib
