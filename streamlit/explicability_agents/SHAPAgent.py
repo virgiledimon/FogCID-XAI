@@ -9,14 +9,14 @@ class SHAPAgent:
         self.X_test = X_test
 
     # Méthode pour expliquer une instance spécifique avec SHAP
-    def explain_instance(self):
+    def explain_instance(self, idx):
 
         if not isinstance(self.X_test, pd.DataFrame):
           feature_names = ['lambda_threshold', 'L_value']
           self.X_test = pd.DataFrame(self.X_test, columns=feature_names)
 
         # Sélection de la première instance de test
-        X_instance = self.X_test.iloc[0]
+        X_instance = self.X_test.iloc[idx]
         print(X_instance)
         # Créer l'explainer SHAP basé sur le modèle (assurez-vous que c'est un modèle d'arbre)
         explainer = shap.TreeExplainer(self.model)
