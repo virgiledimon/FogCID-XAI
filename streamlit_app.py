@@ -75,7 +75,7 @@ def simulate(episodes_number, ml_algorithm, records_number, test_data_size, inst
         detection_agent = DoubleSarsaAgent(db_agent=database_agent, N=episodes_number, nbr_legitimate_users=leg_transm_nbr, nbr_not_legitimate_users=illeg_transm_nbr, nbr_receivers=receivers_nbr) if ml_algorithm == "Double SARSA" else None
 
         # Exécution de l'agent de détection et collecte des données
-        #detection_agent.run_simulation()  # Lancement de la simulation
+        detection_agent.run_simulation()  # Lancement de la simulation
 
         # Récupérer les données de décisions via l'agent PostgreSQL
         decision_data = database_agent.fetch_decisions_data(records_number)
