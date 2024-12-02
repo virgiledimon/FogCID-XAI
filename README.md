@@ -11,9 +11,9 @@ This project aims to detect and explain impersonation attacks in Fog computing e
 
 By applying XAI to Fog computing, the project seeks to ensure accountability in decision-making, helping network administrators and users better understand the underlying logic of the detection model. This improved transparency not only enhances trust in the system but also facilitates better system monitoring, early attack mitigation, and adaptation to evolving threats.
 
-![screenshot](images/screenshot1.png)
+![Web App view 1](images/Screenshot1.png)
 
-![screenshot](images/screenshot2.png)
+![Web App view 2](images/Screenshot2.png)
 
 ### How to run it on your own machine
 
