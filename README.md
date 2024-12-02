@@ -3,7 +3,7 @@
 
 http://fogcid-xai.virgiledimon.com
 
-http://fogcid-xai.streamlit.app
+https://fogcid-xai.streamlit.app
 
 The growing adoption of IoT devices has transformed sectors like smart homes, businesses, and cities, generating massive amounts of diverse data. Fog computing, introduced by Cisco, extends cloud computing closer to the network edge to handle real-time processing demands, mobility, and localization. However, it brings significant challenges related to security and privacy, with impersonation attacks emerging as a key threat due to limited resources at the edge.
 
