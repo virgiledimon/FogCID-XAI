@@ -75,7 +75,7 @@ def simulate(episodes_number, ml_algorithm, records_number, test_data_size, inst
         detection_agent = DoubleSarsaAgent(db_agent=database_agent, N=episodes_number, nbr_legitimate_users=leg_transm_nbr, nbr_not_legitimate_users=illeg_transm_nbr, nbr_receivers=receivers_nbr) if ml_algorithm == "Double SARSA" else None
 
         # Exécution de l'agent de détection et collecte des données
-        detection_agent.run_simulation()  # Lancement de la simulation
+        #detection_agent.run_simulation()  # Lancement de la simulation
 
         # Récupérer les données de décisions via l'agent PostgreSQL
         decision_data = database_agent.fetch_decisions_data(records_number)
@@ -91,15 +91,17 @@ def simulate(episodes_number, ml_algorithm, records_number, test_data_size, inst
         X_train_normalized, X_test_normalized = interpretability_agent.normalize_decision_data(X_train, X_test)
 
         ############################## DETETECTION SEQUENCES DATA
-        st.header("1. Detection sequences")
-        st.divider()
+        st.markdown("### 1. Detection sequences")
 
-        st.subheader("1.1 List of observation states")
+        st.markdown("#### 1.1 List of observation states")
+
         with st.expander("See"):
             observations = detection_agent.env.get_wrapper_attr('spaces')
             st.write(observations)
 
-        st.subheader("1.2 Data preview")
+        st.markdown("#### 1.2 Data preview")
+        
+        st.write("At each interaction step, the agent gathers detailed information, such as the state, selected threshold (λ), signal legitimacy, channel vectors, decisions made, rewards, and performance metrics (FAR, MDR, AER). The collected data is stored in a relational table optimized using TimescaleDB, ensuring efficient temporal data management. This approach allows for detailed performance analysis and traceability, supporting the optimization of the detection agent's strategies.")
         decision_data_allfields = database_agent.fetch_decisions_data_allfields(records_number)
         detection_df = pd.DataFrame(
             decision_data_allfields, 
@@ -114,10 +116,43 @@ def simulate(episodes_number, ml_algorithm, records_number, test_data_size, inst
         )
         st.caption(f"Number of records: {records_number}")
 
+        with st.expander("See fields description"):
+            # Table of field descriptions
+            dataStructure = {
+                "Field": [
+                    "id", "episode", "step", "state", "lambda_threshold", "is_legit", "L_value", 
+                    "v_channel_vector", "r_channel_record", "decision_made", "reward", 
+                    "far", "mdr", "aer", "q_value_a", "q_value_b", "politique_pi", "timestamp"
+                ],
+                "Description": [
+                    "Unique identifier (primary key).",
+                    "Episode number.",
+                    "Step number within the episode.",
+                    "Identifier of the state.",
+                    "Detection threshold (λ) selected for the state.",
+                    "Status of the signal (legitimate or attacker).",
+                    "Normalized Euclidean distance between transmitted and received channel vectors.",
+                    "Channel vector transmitted by the emitter (legitimate or attacker).",
+                    "Channel vector received after transmission and channel perturbation.",
+                    "Decision on the signal (accepted or rejected).",
+                    "Reward assigned based on detection outcome.",
+                    "False Alarm Rate (FAR).",
+                    "Missed Detection Rate (MDR).",
+                    "Average Error Rate (AER).",
+                    "Updated value in Q-table QA.",
+                    "Updated value in Q-table QB.",
+                    "Average maximum value of QA + QB.",
+                    "TimtaStructuretamp for tracking decisions temporally."
+                ]
+            }
+            df = pd.DataFrame(dataStructure)
+            st.dataframe(df, use_container_width=True)
         ############################## INTERPRETABILITY
-        st.header("2. Interpretability")
+        st.markdown("### 2. Interpretability")
+
         st.divider()
-        st.markdown("### Decision Tree")
+
+        st.markdown("##### Decision Tree")
         interpretability_agent.train_decision_model(X_train_normalized, y_train)
         accuracy = interpretability_agent.evaluate_model(X_test_normalized, y_test)
         decision_tree_container = st.container()
@@ -132,11 +167,13 @@ def simulate(episodes_number, ml_algorithm, records_number, test_data_size, inst
             st.caption("Accuracy for Decision Tree  " + str(round(accuracy,2)))
         
         ############################## EXPLICABILITY
-        st.header("3. Explicability")
+        st.markdown("### 3. Explainability")
+
         st.divider()
 
         # # Pour SHAP : Affiche les valeurs de SHAP sous forme de graphique
-        st.subheader("3.1 SHapley Additive exPlanations")
+        st.markdown("#### 3.1 SHapley Additive exPlanations")
+
         shap_agent = SHAPAgent(interpretability_agent.model_decision, X_test_normalized)
         shapley_values, features_names, df_X_test = shap_agent.explain_model() 
         # Explisubheadercability global
@@ -145,7 +182,8 @@ def simulate(episodes_number, ml_algorithm, records_number, test_data_size, inst
         expected_local_values, shap_local_values, shap_local_columns = shap_agent.explain_instance(instance_idx)
         st_shap(shap.force_plot(expected_local_values, shap_local_values, feature_names=shap_local_columns, link="logit", matplotlib=False, show=True, figsize=(9,4)))
 
-        st.subheader("3.2 Local Interpretable Model-Agnostic Explanations")
+        st.markdown("#### 3.2 Local Interpretable Model-Agnostic Explanations")
+
         lime_agent = LIMEAgent(model=interpretability_agent.model_decision, normalized_test_data=X_test_normalized)
         X_local_instance = lime_agent.X_lime_test[instance_idx]
         explainer = lime_agent.explain_instance(X_instance=X_local_instance)
@@ -154,7 +192,8 @@ def simulate(episodes_number, ml_algorithm, records_number, test_data_size, inst
         plt.clf()
         components.html(explainer.as_html(), height=300, width=700)
         
-        st.subheader("3.3 Permutation Feature Importance")
+        st.markdown("#### 3.3 Permutation Feature Importance")
+
         pfi_agent = PFIAgent(interpretability_agent.model_decision, X_test_normalized, y_test)
         importances = pfi_agent.compute_importance()
         st.write("Features importances:", importances)
@@ -182,14 +221,48 @@ def simulate(episodes_number, ml_algorithm, records_number, test_data_size, inst
 
 def main():
     st.title("FogCID-XAI")
-    st.subheader("Explainable AI approach for impersonation attack detection in fog computing")
+    st.markdown("#### Explainable AI approach for impersonation attack detection in fog computing")
     st.write("This project focuses on enhancing the explainability of machine learning models for detecting impersonation attacks in fog computing. \
              The machine learning model used for the simulation is Double SARSA, a reinforcement learning algorithm. \
-             While three explainability approaches were identified, this application specifically emphasizes explaining the agent's decisions to accept or reject signals. \
+             While several explainability aspects were identified, this application specifically emphasizes explaining the agent's decisions to accept or reject signals. \
              It integrates decision trees alongside techniques such as SHAP, LIME, and PFI to provide insights into the model's decision-making process. \
              The goal is to ensure security, transparency, and interpretability in critical IoT environments.")
+    
+    st.markdown("##### Explainable aspects of our RL detection agent")
+
+    st.markdown(
+        """
+        - **Dynamic threshold selection (λ):**  
+        The Double SARSA algorithm adjusts the threshold dynamically using Q-values, which can be explained using methods like SHAP and LIME  
+
+        - **Signals acceptance decisions:**  
+        Decisions to accept or reject signals depend on the dynamic threshold (λ) and the normalized Euclidean distance  
+
+        - **Performance optimization:**  
+        The algorithm minimizes detection errors (FAR, MDR, AER) and maximizes utility through optimal threshold selection
+        """
+    )
+
     st.divider()
 
+    st.subheader("Explanation of acceptance or rejection decisions made by our RL detection agent")
+
+    st.markdown(
+        """
+        | **Environment**                 | Detection of attacks in fog computing                                          |
+        |---------------------------------|---------------------------------------------------------------------------------|
+        | **Agent**                       | Double SARSA                                                                   |
+        | **Type of Explanation**         | Local and Global [Explanation provided by SHAP, LIME, PFI]                    |
+        | **What Needs to be Explained**  | Decisions (acceptance or rejection of signals) made by the RL agent |
+        | **Explanation Process**         | Training an intrinsically interpretable decision tree based on collected data. Features are then extracted and analyzed to provide explanations to the target audience. |
+        | **Decision Process**            | MDP (Markov Decision Process) and policy updates using Double SARSA           |
+        | **Target Audience**             | Administrators and cybersecurity experts                                       |
+        | **Features**                    | Detection threshold (λ), normalized Euclidean distance (L) of channel gains between the receiver and the transmitter |
+        """
+    )
+
+    #####################################################################################################
+    
     st.sidebar.markdown("# Simulation Configuration")
 
     # Formulaire de choix de simulation
@@ -206,7 +279,7 @@ def main():
             local_instance_idx = st.number_input("Local explicability instance idx", min_value=0, value=1, max_value=int(dataset_rows_nbr*(test_size/100)))
             submitted = st.form_submit_button("Rerun simulation")
         
-    ###############################################################
+    #####################################################################################################
 
     # Lorsque le formulaire est soumis (Rerunning)
     if submitted:
