@@ -142,7 +142,7 @@ def simulate(episodes_number, ml_algorithm, records_number, test_data_size, inst
                     "Updated value in Q-table QA.",
                     "Updated value in Q-table QB.",
                     "Average maximum value of QA + QB.",
-                    "TimtaStructuretamp for tracking decisions temporally."
+                    "created_at and updated_at."
                 ]
             }
             df = pd.DataFrame(dataStructure)
@@ -151,6 +151,8 @@ def simulate(episodes_number, ml_algorithm, records_number, test_data_size, inst
         st.markdown("### 2. Interpretability")
 
         st.divider()
+
+        st.markdown("The Double SARSA algorithm effectively detects attacks but lacks transparency in its decision-making. By converting its processes into a decision tree model, key actions like threshold selection and signal evaluation become interpretable. This approach fosters user trust, simplifies performance analysis, and ensures transparency in the detection process.")
 
         st.markdown("##### Decision Tree")
         interpretability_agent.train_decision_model(X_train_normalized, y_train)
@@ -165,7 +167,64 @@ def simulate(episodes_number, ml_algorithm, records_number, test_data_size, inst
             # st.pyplot(fig)
             # plt.clf()
             st.caption("Accuracy for Decision Tree  " + str(round(accuracy,2)))
-        
+
+        with st.expander("See description"):
+            st.markdown("""
+                ##### Key Elements of a Decision Tree
+
+                When visualizing a decision tree, each of node provides key information about the decision-making process. Here's a breakdown of the elements we might encounter:
+
+                ###### **Feature Split (e.g., `lambda_threshold <= 0.459`)**
+                This represents the condition used to split the data at this node. The node splits based on whether the feature `lambda_threshold` is less than or equal to `0.459`.
+
+                ###### **Gini (e.g., `gini = 0.085`)**
+                The Gini Impurity measures the purity of the node:
+                - **Gini = 0**: The node is perfectly pure (all samples belong to one class).
+                - **Higher Gini**: Indicates more mixed classes in the node.
+
+                ###### **Samples (e.g., `samples = 45`)**
+                Indicates the number of data points present in this node. For this instance, `samples = 45` means 45 data points reach this node.
+
+                ###### **Values (e.g., `value = [43, 2]`)**
+                Represents the class distribution of the samples:
+                `value = [43, 2]`: 43 samples belong to one class, and 2 belong to the other.
+
+                ###### **Class (e.g., `class = Reject`)**
+                The predicted class for this node:
+                - Based on the majority class in `value`. For example:
+                - If `value = [43, 2]`, the node predicts the class "Reject".
+                        
+                ###### Node colors
+                Node colors reflect the dominance of a class:
+                - Nodes with a single class are solid-colored.
+                - Mixed nodes show blended colors, proportional to the class distribution.
+
+                ---
+                """
+            )
+            st.markdown("##### Example breakdown")
+            st.markdown("""
+                ###### Node 1
+                The example below indicates that the most samples at this node (43 out of 45) belong to the "Reject" class. The node is highly pure so has low Gini value.
+            """)
+            st.code(''' 
+                lambda_threshold <= 0.459
+                Gini: 0.085
+                Samples: 45
+                Values: [43, 2]
+                Class: Reject
+            ''', language=None)
+            st.markdown("""
+                ###### Node 2
+                The node below is less pure (Gini = 0.484), with 7 samples in the "Reject" class and 10 in the "Accept" class. The predicted class is "Accept", based on the majority in `value`.
+            """)
+            st.code(''' 
+                l_value <= -0.067
+                Gini: 0.484
+                Samples: 17
+                Values: [7, 10]
+                Class: Accept
+            ''', language=None)
         ############################## EXPLICABILITY
         st.markdown("### 3. Explainability")
 
